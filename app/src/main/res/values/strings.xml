@@ -1,0 +1,41 @@
+<resources>
+    <string name="bharatiya_vidya_bhavan_s">Bharatiya Vidya Bhavan\'s</string>
+    <string name="sardar_patel_institute_of_technology">Sardar Patel Institute of Technology</string>
+    <string name="s_p_i_t_andheri">(S.P.I.T), Andheri.</string>
+    <string name="login">LOGIN</string>
+    <string name="register">REGISTER</string>
+    <string name="policy"><![CDATA[By creating new account, you agree to our    Terms of Services & Privacy Policy.]]></string>
+    <string name="or_log_in_with">Or log in with</string>
+    <string name="todo">TODO</string>
+    <string name="todo1">TODO</string>
+    <string name="knowledge_associate">Knowledge Associate</string>
+
+
+    <string name="app_name">Acquisition App</string>
+    <string name="app_name2">Track\On Park</string>
+    <string name="welcome_text">Welcome to Track On Park</string>
+    <string name="tag_line">Your safety is our concern</string>
+    <string name="login_text_btn">LOGIN</string>
+    <string name="register_text_btn">REGISTER</string>
+    <string name="tnc">By creating new account,you agree to our
+\nTerms of Services &amp; Privacy Policy</string>
+    <string name="or_log_in">Or log in with</string>
+    <string name="welcome_back">Welcome Back</string>
+    <string name="welcome_back_sub">Please login to your account</string>
+    <string name="email_hint">Email or phone number</string>
+    <string name="password">Password</string>
+    <string name="forgot_password">Forgot Password ?</string>
+    <string name="dont_have_account">Dont\'t have an account</string>
+    <string name="have_account">Already Registered ?</string>
+    <string name="register_now">Register Now</string>
+    <string name="login_now">Login Now</string>
+    <string name="back">Back</string>
+    <string name="register_new">Register New Account</string>
+    <string name="username">Username</string>
+    <string name="email">Email</string>
+    <string name="phone">Phone</string>
+    <string name="title_activity_maps">Map</string>
+
+    <string name="label_google_sign_in">Firebase + Google Sign In</string>
+
+</resources>
