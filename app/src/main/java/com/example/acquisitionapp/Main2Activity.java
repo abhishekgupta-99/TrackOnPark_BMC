@@ -33,6 +33,15 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.ml.common.FirebaseMLException;
+import com.google.firebase.ml.common.modeldownload.FirebaseModelManager;
+import com.google.firebase.ml.vision.FirebaseVision;
+import com.google.firebase.ml.vision.automl.FirebaseAutoMLLocalModel;
+import com.google.firebase.ml.vision.automl.FirebaseAutoMLRemoteModel;
+import com.google.firebase.ml.vision.common.FirebaseVisionImage;
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabel;
+import com.google.firebase.ml.vision.label.FirebaseVisionImageLabeler;
+import com.google.firebase.ml.vision.label.FirebaseVisionOnDeviceAutoMLImageLabelerOptions;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
@@ -46,6 +55,7 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -87,6 +97,13 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
     String lattitude, longitude;
     public String Lat, Logg;
 
+     FirebaseAutoMLRemoteModel remoteModel;
+     FirebaseAutoMLLocalModel localModel;
+    FirebaseVisionImageLabeler labeler;
+    FirebaseVisionImage image_model;
+
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -119,6 +136,40 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         bt1.setBackgroundColor(getResources().getColor(R.color.grey_100));
         i1.setOnClickListener(this);
 
+        remoteModel = new FirebaseAutoMLRemoteModel.Builder("Cars_Label").build();
+
+
+        localModel = new FirebaseAutoMLLocalModel.Builder()
+                .setAssetFilePath("model/manifest.json")
+                .build();
+
+        downloadmodel();
+
+    }
+
+    private void downloadmodel() {
+        FirebaseModelManager.getInstance().isModelDownloaded(  remoteModel)
+                .addOnSuccessListener(new OnSuccessListener<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean isDownloaded) {
+                        FirebaseVisionOnDeviceAutoMLImageLabelerOptions.Builder optionsBuilder;
+                        if (isDownloaded) {
+                            optionsBuilder = new FirebaseVisionOnDeviceAutoMLImageLabelerOptions.Builder(remoteModel);
+                        } else {
+                            optionsBuilder = new FirebaseVisionOnDeviceAutoMLImageLabelerOptions.Builder(localModel);
+                        }
+                        FirebaseVisionOnDeviceAutoMLImageLabelerOptions options = optionsBuilder
+                                .setConfidenceThreshold(0.6f)  // Evaluate your model in the Firebase console
+                                // to determine an appropriate threshold.
+                                .build();
+
+                        try {
+                            labeler = FirebaseVision.getInstance().getOnDeviceAutoMLImageLabeler(options);
+                        } catch (FirebaseMLException e) {
+                            // Error.
+                        }
+                    }
+                });
     }
 
     @Override
@@ -133,7 +184,7 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
 
 //
             //  mProgress.setMessage("Uploading your Status...");
-
+            evaluate_model(photoURI);
             progress = new Asyncc(this, photoURI, progressBar);
             progress.execute();
             bt1.setClickable(false);
@@ -181,8 +232,40 @@ public class Main2Activity extends AppCompatActivity implements View.OnClickList
         }
     }
 
+    private void evaluate_model(Uri photoURI) {
+        try {
+            image_model = FirebaseVisionImage.fromFilePath(Main2Activity.this, photoURI);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
-        //   Log.d("bataBAOS0", String.valueOf(dataBAOS[0]));
+
+        labeler.processImage(image_model)
+                .addOnSuccessListener(new OnSuccessListener<List<FirebaseVisionImageLabel>>() {
+                    @Override
+                    public void onSuccess(List<FirebaseVisionImageLabel> labels) {
+                        // Task completed successfully
+
+                        for (FirebaseVisionImageLabel label: labels) {
+                            String text = label.getText();
+                            Log.d("ML_OUTPUT", text);
+                            Toast.makeText(Main2Activity.this, text, Toast.LENGTH_SHORT).show();
+                            float confidence = label.getConfidence();
+                        }
+                        // ...
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        // Task failed with an exception
+                        // ...
+                    }
+                });
+    }
+
+
+    //   Log.d("bataBAOS0", String.valueOf(dataBAOS[0]));
 
 
         public void uploadphoto (Uri dataBAOS){
